@@ -1,0 +1,10 @@
+.stack {
+  --stack-gutter: var(--size-3);
+
+  display: flex;
+  gap: var(--stack-gutter);
+}
+
+.stack--vertical {
+  flex-direction: column;
+}

@@ -1,0 +1,16 @@
+@import 'https://unpkg.com/open-props';
+@import 'https://unpkg.com/open-props/normalize.min.css';
+@import 'https://unpkg.com/open-props/buttons.min.css';
+
+@import './_stack.css';
+
+.container {
+  padding: var(--size-4);
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(17, 1fr);
+  justify-items: center;
+}
