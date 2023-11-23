@@ -1,4 +1,7 @@
 // https://roland50.studio/
+// https://medium.com/geekculture/building-a-modular-synth-with-web-audio-api-and-javascript-d38ccdeca9ea
+// https://russellgood.com/js-synthesizer-part-3-multi-octave-keyboard/
+
 import './components/rack';
 import './components/controls/toggle';
 
@@ -14,7 +17,7 @@ const executeStep = () => {
 };
 
 const loop = () => {
-  const bpm = 130;
+  const bpm = 60;
 
   if (shouldUpdate(bpm)) {
     executeStep();
@@ -29,6 +32,8 @@ toggleElement.addEventListener('click', () => {
   toggleElement.isOn = isOn;
 
   if (isOn) {
+    executeStep();
+
     loop();
   } else {
     rackElement.reset();

@@ -1,37 +1,40 @@
 import { context, destination } from '@/audioNodes/destination';
 
-const createGain = () => new GainNode(context);
-
-const createOscillator = ({ type, frequency }) => {
-  const oscillator = new OscillatorNode(context, {
-    frequency,
-    type,
-  });
-
-  return oscillator;
-};
+// dumb mofo
+const octaves = new Map([
+  [1, 1],
+  [2, 2],
+  [3, 4],
+  [4, 8],
+  [5, 16],
+  [6, 32],
+  [7, 64],
+]);
 
 const tones = [
   {
-    label: 'A',
-    id: 'a',
-    frequency: 300,
-    type: 'sine',
-  },
-  {
-    label: 'B',
-    id: 'b',
-    frequency: 500,
-    type: 'sine',
-  },
-  {
     label: 'C',
     id: 'c',
-    frequency: 277.183,
-    type: 'sine',
+    frequency: 32.703195662574829,
+    type: 'sawtooth',
+    octave: 2,
+  },
+  {
+    label: 'D',
+    id: 'D',
+    frequency: 36.708095989675945,
+    type: 'sawtooth',
+    octave: 2,
+  },
+  {
+    label: 'E',
+    id: 'e',
+    frequency: 41.203444614108741,
+    type: 'sawtooth',
+    octave: 2,
   },
 ].map((tone) => {
-  const gain = createGain();
+  const gain = new GainNode(context);
   gain.connect(destination);
   gain.gain.value = 0;
 
@@ -41,17 +44,79 @@ const tones = [
   };
 });
 
+const createOscillator = ({ type, frequency, octave }) => {
+  const oscillator = new OscillatorNode(context, {
+    frequency: frequency * octaves.get(parseInt(octave)),
+    type,
+  });
+
+  return oscillator;
+};
+
 const playTone = (tone) => {
-  const { gain } = tone;
+  const { currentTime: now } = context;
   const oscillator = createOscillator(tone);
+  const oscillator2 = createOscillator({
+    ...tone,
+    type: 'square',
+  });
+  const gain = new GainNode(context);
 
-  oscillator.connect(tone.gain);
+  const lfo = new OscillatorNode(context, {
+    type: 'sawtooth',
+    frequency: 5,
+  });
 
+  const lfoGain = new GainNode(context);
+  lfoGain.gain.setValueAtTime(1, now);
+
+  // in MS
+  // https://en.wikipedia.org/wiki/Envelope_(music)#ADSR
+  const envelope = {
+    attack: 0.1,
+    decay: 0,
+    sustain: 0.2,
+    release: 1,
+  };
+
+  const envelopeTime = Object.values(envelope).reduce(
+    (total, val) => total + val,
+    0,
+  );
+
+  lfo.connect(lfoGain);
+  lfoGain.connect(oscillator.frequency);
+  lfoGain.connect(oscillator2.frequency);
+  oscillator.connect(gain);
+  oscillator2.connect(gain);
+
+  gain.connect(destination);
   gain.gain.value = 0;
-  oscillator.start();
 
-  gain.gain.linearRampToValueAtTime(1, context.currentTime + 0.1);
-  gain.gain.linearRampToValueAtTime(0, context.currentTime + 0.2);
+  // `linearRampToValueAtTime`: The change starts at the time specified for the previous event
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(1, now + envelope.attack);
+  gain.gain.linearRampToValueAtTime(1, now + envelope.attack + envelope.decay);
+  gain.gain.setValueAtTime(
+    1,
+    now + envelope.attack + envelope.decay + envelope.sustain,
+  );
+  gain.gain.linearRampToValueAtTime(
+    0,
+    now +
+      envelope.attack +
+      envelope.decay +
+      envelope.sustain +
+      envelope.release,
+  );
+
+  oscillator.start();
+  oscillator2.start();
+  oscillator.stop(now + envelopeTime);
+  oscillator2.stop(now + envelopeTime);
+
+  lfo.start();
+  lfo.stop(now + envelopeTime);
 };
 
 export { tones, playTone };

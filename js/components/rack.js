@@ -1,8 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import { tones, playTone } from '@/config/tones';
-import { destination, context } from '@/audioNodes/destination';
 
 import '@/components/step';
+import '@/components/oscillator-type';
 
 export class Rack extends LitElement {
   static styles = css`
@@ -28,7 +28,7 @@ export class Rack extends LitElement {
   }
 
   render() {
-    const toneRows = tones.map((tone) => this.renderRow(tone));
+    const toneRows = tones.map((tone, index) => this.renderRow(tone, index));
     const indicatorRow = this.renderIndicatorRow();
 
     return html`
@@ -45,12 +45,12 @@ export class Rack extends LitElement {
     this.stepElements = [...this.shadowRoot.querySelectorAll('p-step')];
   }
 
-  renderRow(tone) {
+  renderRow(tone, rowIndex) {
     const cells = [html`<div>${this.renderTypeDropdown(tone)}</div>`];
 
     for (let i = 0; i < this.steps; i++) {
       const id = `${tone.id}-${i}`;
-      const isSelected = tone.id === 'c';
+      const isSelected = (i + rowIndex) % 3 === 0;
 
       cells.push(html`
         <div class="cell">
@@ -89,12 +89,12 @@ export class Rack extends LitElement {
 
   renderTypeDropdown(tone) {
     const dropdown = html`
-      <select id="${tone.id}" @change="${this.onToneTypeChanged}">
-        <option value="sine">sine</option>
-        <option value="square">square</option>
-        <option value="sawtooth">sawtooth</option>
-        <option value="triangle">triangle</option>
-      </select>
+      <p-oscillator-type
+        toneId="${tone.id}"
+        .type="${tone.type}"
+        @onTypeChange="${this.onToneTypeChanged}"
+        @onOctaveChange="${this.onOctaveChanged}"
+      ></p-oscillator-type>
     `;
     return html`
       <div>${tone.label}</div>
@@ -102,10 +102,18 @@ export class Rack extends LitElement {
     `;
   }
 
-  onToneTypeChanged({ target: { id, value } }) {
+  onToneTypeChanged(e) {
+    const { id, value } = e.detail;
     const tone = tones.find((t) => t.id === id);
 
     tone.type = value;
+  }
+
+  onOctaveChanged(e) {
+    const { id, value } = e.detail;
+    const tone = tones.find((t) => t.id === id);
+
+    tone.octave = value;
   }
 
   nextStep() {
