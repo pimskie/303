@@ -58,7 +58,8 @@ const playTone = (tone) => {
   const oscillator = createOscillator(tone);
   const oscillator2 = createOscillator({
     ...tone,
-    type: 'square',
+    type: 'sawtooth',
+    frequency: tone.frequency * 0.99,
   });
   const gain = new GainNode(context);
 
@@ -73,10 +74,10 @@ const playTone = (tone) => {
   // in MS
   // https://en.wikipedia.org/wiki/Envelope_(music)#ADSR
   const envelope = {
-    attack: 0.1,
+    attack: 0.2,
     decay: 0,
     sustain: 0.2,
-    release: 1,
+    release: 0.5,
   };
 
   const envelopeTime = Object.values(envelope).reduce(
