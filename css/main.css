@@ -4,6 +4,10 @@
 
 @import './_stack.css';
 
+h1 {
+  margin-block-start: 0;
+}
+
 .container {
   padding: var(--size-4);
 }

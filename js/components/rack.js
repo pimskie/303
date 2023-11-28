@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { tones, playTone } from '@/config/tones';
 
+import '@/components/heading';
 import '@/components/step';
 import '@/components/oscillator-type';
 
@@ -33,7 +34,7 @@ export class Rack extends LitElement {
 
     return html`
       <div class="rack">
-        <h1>Rack</h1>
+        <p-heading>Rack</p-heading>
         <div class="grid" style="--columns: ${this.steps + 1};">
           ${toneRows} ${indicatorRow}
         </div>

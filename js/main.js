@@ -4,13 +4,16 @@
 
 import './components/rack';
 import './components/controls/toggle';
+import './components/controls/envelope-editor';
+
+import { tones, playTone } from './config/tones';
 
 import { shouldUpdate } from '@/utils/timer';
 
 let rafId = null;
 let isOn = false;
 const rackElement = document.querySelector('p-rack');
-const toggleElement = document.querySelector('p-toggle');
+const toggleElement = document.querySelector('#toggle');
 
 const executeStep = () => {
   rackElement.nextStep();
@@ -39,4 +42,10 @@ toggleElement.addEventListener('click', () => {
     rackElement.reset();
     cancelAnimationFrame(rafId);
   }
+});
+
+document.querySelector('#play').addEventListener('click', () => {
+  const tone = tones.find((t) => t.id === 'c');
+
+  playTone(tone);
 });

@@ -1,5 +1,5 @@
 .stack {
-  --stack-gutter: var(--size-3);
+  --stack-gutter: var(--size-2);
 
   display: flex;
   gap: var(--stack-gutter);
