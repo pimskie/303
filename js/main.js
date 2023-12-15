@@ -6,8 +6,7 @@ import './components/rack';
 import './components/controls/toggle';
 import './components/controls/envelope-editor';
 
-import { tones, playTone } from './config/tones';
-
+import { tones, playTone, loadReverbs } from './config/tones';
 import { shouldUpdate } from '@/utils/timer';
 
 let rafId = null;
@@ -20,7 +19,7 @@ const executeStep = () => {
 };
 
 const loop = () => {
-  const bpm = 60;
+  const bpm = 130;
 
   if (shouldUpdate(bpm)) {
     executeStep();
@@ -29,23 +28,29 @@ const loop = () => {
   rafId = requestAnimationFrame(loop);
 };
 
-toggleElement.addEventListener('click', () => {
-  isOn = !isOn;
+async function start() {
+  await loadReverbs();
 
-  toggleElement.isOn = isOn;
+  toggleElement.addEventListener('click', () => {
+    isOn = !isOn;
 
-  if (isOn) {
-    executeStep();
+    toggleElement.isOn = isOn;
 
-    loop();
-  } else {
-    rackElement.reset();
-    cancelAnimationFrame(rafId);
-  }
-});
+    if (isOn) {
+      executeStep();
 
-document.querySelector('#play').addEventListener('click', () => {
-  const tone = tones.find((t) => t.id === 'c');
+      loop();
+    } else {
+      rackElement.reset();
+      cancelAnimationFrame(rafId);
+    }
+  });
 
-  playTone(tone);
-});
+  document.querySelector('#play').addEventListener('click', () => {
+    const tone = tones.find((t) => t.id === 'c');
+
+    playTone(tone);
+  });
+}
+
+start();

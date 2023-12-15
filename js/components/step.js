@@ -6,8 +6,9 @@ export class Step extends LitElement {
       /* background: red; */
     }
 
-    :host([tone='e']) {
-      background: hotpink;
+    input {
+      width: 2rem;
+      aspect-ratio: 1/1;
     }
   `;
 

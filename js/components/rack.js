@@ -12,6 +12,12 @@ export class Rack extends LitElement {
       grid-template-columns: repeat(var(--columns), 1fr);
       gap: var(--size-3);
     }
+
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   `;
 
   static properties = {
