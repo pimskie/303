@@ -1,10 +1,10 @@
 // in MS
 // https://en.wikipedia.org/wiki/Envelope_(music)#ADSR
 const envelope = {
-  attack: 0.2,
+  attack: 0.0,
   decay: 0,
   sustain: 0.2,
-  release: 0.5,
+  release: 0.2,
 };
 
 const getEnvelopeTotalTime = () => {

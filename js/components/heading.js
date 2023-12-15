@@ -1,18 +1,19 @@
-import { LitElement, html } from 'lit';
+import { LitElement } from 'lit';
+import { literal, html } from 'lit/static-html.js';
 
 export class Heading extends LitElement {
   static properties = {
-    tag: { type: String },
+    //tag: { type: String },
   };
+
+  tag = literal`h1`;
 
   constructor() {
     super();
-
-    this.tag = 'h1';
   }
 
   render() {
-    return html`<h1><slot></slot></h1>`;
+    return html`<${this.tag}><slot></slot></${this.tag}>`;
   }
 }
 

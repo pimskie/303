@@ -6,7 +6,6 @@ export class EnvelopeEditor extends LitElement {
   static styles = css`
     .editor {
       display: grid;
-      gap: var(--size-3);
       grid-template-columns: repeat(4, 5rem);
     }
 
@@ -19,7 +18,7 @@ export class EnvelopeEditor extends LitElement {
 
     input[type='range'] {
       width: 100%;
-      margin: 4rem 1rem;
+      margin: 2rem 0;
       transform: rotate(270deg);
     }
   `;
@@ -41,12 +40,13 @@ export class EnvelopeEditor extends LitElement {
                 type="range"
                 min="0"
                 max="1"
-                step="0.1"
+                step="0.05"
                 value="${envelope[p.id]}"
                 id="${p.id}"
                 @input="${this.onInput}"
               />
               <label for="${p.id}">${p.label}</label>
+              <div class="value">${envelope[p.id]}</div>
             </div>
           `,
         )}
@@ -58,6 +58,8 @@ export class EnvelopeEditor extends LitElement {
     const { id, valueAsNumber } = target;
 
     envelope[id] = valueAsNumber;
+
+    this.requestUpdate();
   }
 }
 

@@ -1,19 +1,29 @@
 import { LitElement, html, css } from 'lit';
 
 export class Step extends LitElement {
+  static styles = css`
+    :host([checked]) {
+      /* background: red; */
+    }
+
+    :host([tone='e']) {
+      background: hotpink;
+    }
+  `;
+
   static properties = {
-    isSelected: { type: Boolean, reflect: true },
+    checked: { type: Boolean, reflect: true },
     id: { type: String },
     tone: { type: String },
     index: { type: String },
   };
 
   render() {
-    return html`<input
+    return html` <input
       type="checkbox"
       name="step"
       id="${this.id}"
-      ?checked="${this.isSelected}"
+      ?checked="${this.checked}"
       @change="${this.onChange}"
     />`;
   }
@@ -21,10 +31,10 @@ export class Step extends LitElement {
   onChange(e) {
     const options = {
       id: this.id,
-      isSelected: e.target.checked,
+      checked: e.target.checked,
     };
 
-    this.isSelected = options.isSelected;
+    this.checked = options.checked;
 
     // this.dispatchEvent(
     //   new CustomEvent('selectedChanged', {

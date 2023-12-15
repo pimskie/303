@@ -4,8 +4,13 @@
 
 @import './_stack.css';
 
+:root {
+  --color: red;
+}
+
 h1 {
   margin-block-start: 0;
+  color: red;
 }
 
 .container {

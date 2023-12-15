@@ -24,18 +24,20 @@ const tones = [
     type: 'sawtooth',
     octave: 2,
   },
-].map((tone) => {
-  const gain = new GainNode(context);
-  gain.connect(destination);
-  gain.gain.value = 0;
+]
+  .sort((a, b) => b.frequency - a.frequency)
+  .map((tone) => {
+    const gain = new GainNode(context);
+    gain.connect(destination);
+    gain.gain.value = 0;
 
-  return {
-    ...tone,
-    gain,
-  };
-});
+    return {
+      ...tone,
+      gain,
+    };
+  });
 
-const createOscillator = ({ type, frequency, octave }, detune = 0) => {
+const createOscillator = ({ type, frequency, octave }, { detune = 0 } = {}) => {
   const oscillator = new OscillatorNode(context, {
     frequency: frequency * octaves.get(parseInt(octave)),
     type,
@@ -45,30 +47,34 @@ const createOscillator = ({ type, frequency, octave }, detune = 0) => {
   return oscillator;
 };
 
+const createLFO = (options = { type: 'sawtooth', frequency: 5 }) => {
+  const LFO = new OscillatorNode(context, options);
+
+  return LFO;
+};
+
 const playTone = (tone) => {
   const { currentTime: now } = context;
+
   const oscillator = createOscillator(tone);
   const oscillator2 = createOscillator(
     {
       ...tone,
       type: 'sawtooth',
     },
-    10,
+    { detune: 10 },
   );
   const oscillator3 = createOscillator(
     {
       ...tone,
       type: 'sawtooth',
     },
-    -10,
+    { detune: -10 },
   );
 
   const gain = new GainNode(context);
 
-  const lfo = new OscillatorNode(context, {
-    type: 'sawtooth',
-    frequency: 5,
-  });
+  const lfo = createLFO();
 
   const lfoGain = new GainNode(context);
   lfoGain.gain.setValueAtTime(1, now);

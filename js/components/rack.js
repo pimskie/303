@@ -51,15 +51,15 @@ export class Rack extends LitElement {
 
     for (let i = 0; i < this.steps; i++) {
       const id = `${tone.id}-${i}`;
-      const isSelected = (i + rowIndex) % 3 === 0;
+      const checked = (i + rowIndex) % 3 === 0;
 
       cells.push(html`
         <div class="cell">
           <p-step
             id=${id}
-            tone="${tone.id}"
+            ?checked="${checked}"
+            .tone="${tone.id}"
             .index="${i}"
-            ?isselected="${isSelected}"
           >
           </p-step>
         </div>
@@ -140,7 +140,7 @@ export class Rack extends LitElement {
 
   runStep() {
     const checkedStepElements = this.stepElements.filter(
-      (e) => e.index === this.step && e.isSelected,
+      (e) => e.index === this.step && e.checked,
     );
 
     const checkedTones = checkedStepElements.map((e) => e.tone);
