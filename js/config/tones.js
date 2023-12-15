@@ -1,4 +1,5 @@
 import { context, destination } from '@/audioNodes/destination';
+import { createLowPassFilter } from '@/audioNodes/lowPassFilter';
 import { envelope, getEnvelopeTotalTime } from '@/config/envelope';
 import { octaves } from '@/config/octaves';
 
@@ -47,16 +48,18 @@ const createOscillator = ({ type, frequency, octave }, { detune = 0 } = {}) => {
   return oscillator;
 };
 
-const createLFO = (options = { type: 'sawtooth', frequency: 5 }) => {
-  const LFO = new OscillatorNode(context, options);
-
-  return LFO;
+const createLFO = (options = { type: 'sawtooth', frequency: 100 }) => {
+  return new OscillatorNode(context, options);
 };
 
 const playTone = (tone) => {
   const { currentTime: now } = context;
 
   const oscillator = createOscillator(tone);
+  const lowPassFilter = createLowPassFilter();
+
+  console.log(lowPassFilter);
+
   const oscillator2 = createOscillator(
     {
       ...tone,
@@ -64,6 +67,7 @@ const playTone = (tone) => {
     },
     { detune: 10 },
   );
+
   const oscillator3 = createOscillator(
     {
       ...tone,
@@ -72,35 +76,38 @@ const playTone = (tone) => {
     { detune: -10 },
   );
 
-  const gain = new GainNode(context);
-
   const lfo = createLFO();
 
   const lfoGain = new GainNode(context);
   lfoGain.gain.setValueAtTime(1, now);
 
   const envelopeTime = getEnvelopeTotalTime();
+  const envelopeGain = new GainNode(context);
 
   lfo.connect(lfoGain);
   lfoGain.connect(oscillator.frequency);
   lfoGain.connect(oscillator2.frequency);
   lfoGain.connect(oscillator3.frequency);
-  oscillator.connect(gain);
-  oscillator2.connect(gain);
-  oscillator3.connect(gain);
 
-  gain.connect(destination);
-  gain.gain.value = 0;
+  oscillator.connect(lowPassFilter);
+  oscillator2.connect(lowPassFilter);
+  oscillator3.connect(lowPassFilter);
+
+  lowPassFilter.connect(envelopeGain);
+  envelopeGain.connect(destination);
 
   // `linearRampToValueAtTime`: The change starts at the time specified for the previous event
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(1, now + envelope.attack);
-  gain.gain.linearRampToValueAtTime(1, now + envelope.attack + envelope.decay);
-  gain.gain.setValueAtTime(
+  envelopeGain.gain.setValueAtTime(0, now);
+  envelopeGain.gain.linearRampToValueAtTime(1, now + envelope.attack);
+  envelopeGain.gain.linearRampToValueAtTime(
+    1,
+    now + envelope.attack + envelope.decay,
+  );
+  envelopeGain.gain.setValueAtTime(
     1,
     now + envelope.attack + envelope.decay + envelope.sustain,
   );
-  gain.gain.linearRampToValueAtTime(
+  envelopeGain.gain.linearRampToValueAtTime(
     0,
     now +
       envelope.attack +
@@ -110,10 +117,12 @@ const playTone = (tone) => {
   );
 
   oscillator.start();
-  oscillator2.start();
-  oscillator3.start();
   oscillator.stop(now + envelopeTime);
+
+  oscillator2.start();
   oscillator2.stop(now + envelopeTime);
+
+  oscillator3.start();
   oscillator3.stop(now + envelopeTime);
 
   lfo.start();
