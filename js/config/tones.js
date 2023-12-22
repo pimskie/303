@@ -1,11 +1,14 @@
 import { context, destination } from '@/audioNodes/destination';
 import { createLowPassFilter } from '@/audioNodes/lowPassFilter';
 import { loadReverb } from '@/audioNodes/reverbs';
+import { createNoise } from '@/audioNodes/noise';
 
 import { envelope, getEnvelopeTotalTime } from '@/config/envelope';
 import { octaves } from '@/config/octaves';
+import { waveOptions } from '@/config/waves/wurlitzer';
 
 const reverbs = [];
+const wave = new PeriodicWave(context, waveOptions);
 
 const loadReverbs = async () => {
   const audioBuffer = await loadReverb();
@@ -17,24 +20,28 @@ const tones = [
   {
     label: 'C',
     id: 'c',
-    frequency: 32.703195662574829,
-    type: 'sawtooth',
+    frequency: 60.703195662574829,
+    // frequency: 32.703195662574829,
+    type: 'square',
+    wave,
     octave: 2,
   },
-  {
-    label: 'D',
-    id: 'D',
-    frequency: 36.708095989675945,
-    type: 'sawtooth',
-    octave: 2,
-  },
-  {
-    label: 'E',
-    id: 'e',
-    frequency: 41.203444614108741,
-    type: 'sawtooth',
-    octave: 2,
-  },
+  // {
+  //   label: 'D',
+  //   id: 'D',
+  //   frequency: 36.708095989675945,
+  //   type: 'sine',
+  //   wave,
+  //   octave: 2,
+  // },
+  // {
+  //   label: 'E',
+  //   id: 'e',
+  //   frequency: 41.203444614108741,
+  //   type: 'sine',
+  //   wave,
+  //   octave: 2,
+  // },
 ]
   .sort((a, b) => b.frequency - a.frequency)
   .map((tone) => {
@@ -48,7 +55,10 @@ const tones = [
     };
   });
 
-const createOscillator = ({ type, frequency, octave }, { detune = 0 } = {}) => {
+const createOscillator = (
+  { type, frequency, octave, wave },
+  { detune = 0 } = {},
+) => {
   const oscillator = new OscillatorNode(context, {
     frequency: frequency * octaves.get(parseInt(octave)),
     type,
@@ -58,15 +68,15 @@ const createOscillator = ({ type, frequency, octave }, { detune = 0 } = {}) => {
   return oscillator;
 };
 
-const createLFO = (options = { type: 'sawtooth', frequency: 0.5 }) => {
-  return new OscillatorNode(context, options);
-};
+const createLFO = (options = { type: 'sawtooth', frequency: 0.5 }) =>
+  new OscillatorNode(context, options);
 
 const playTone = (tone) => {
   const { currentTime: now } = context;
 
   const oscillator = createOscillator(tone);
   const lowPassFilter = createLowPassFilter();
+  const noise = createNoise();
 
   const oscillator2 = createOscillator(
     {
@@ -87,7 +97,7 @@ const playTone = (tone) => {
   const lfo = createLFO();
 
   const lfoGain = new GainNode(context);
-  lfoGain.gain.setValueAtTime(20, now);
+  lfoGain.gain.setValueAtTime(10, now);
 
   const envelopeTime = getEnvelopeTotalTime();
   const envelopeGain = new GainNode(context);
@@ -103,9 +113,11 @@ const playTone = (tone) => {
   oscillator2.connect(lowPassFilter);
   oscillator3.connect(lowPassFilter);
 
+  noise.connect(lowPassFilter);
+
   lowPassFilter.connect(envelopeGain);
-  envelopeGain.connect(convolver);
-  convolver.connect(destination);
+  envelopeGain.connect(destination);
+  // convolver.connect(destination);
 
   // `linearRampToValueAtTime`: The change starts at the time specified for the previous event
   envelopeGain.gain.setValueAtTime(0, now);
@@ -138,6 +150,9 @@ const playTone = (tone) => {
 
   lfo.start();
   lfo.stop(now + envelopeTime);
+
+  noise.start();
+  noise.stop(now + 0.5);
 };
 
 export { tones, playTone, loadReverbs };

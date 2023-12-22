@@ -5,7 +5,7 @@
 import './components/rack';
 import './components/controls/toggle';
 import './components/controls/envelope-editor';
-
+import { playExample } from './example';
 import { tones, playTone, loadReverbs } from './config/tones';
 import { shouldUpdate } from '@/utils/timer';
 
@@ -47,9 +47,7 @@ async function start() {
   });
 
   document.querySelector('#play').addEventListener('click', () => {
-    const tone = tones.find((t) => t.id === 'c');
-
-    playTone(tone);
+    playExample();
   });
 }
 
