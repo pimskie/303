@@ -45,10 +45,6 @@ async function start() {
       cancelAnimationFrame(rafId);
     }
   });
-
-  document.querySelector('#play').addEventListener('click', () => {
-    playExample();
-  });
 }
 
 start();
